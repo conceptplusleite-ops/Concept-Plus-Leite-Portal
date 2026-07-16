@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Concept Plus Leite 2026 - Tutoriais de Extração</title>
+    <!-- Tailwind CSS para Design Moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- TELA DE LOGIN (BLOQUEIO POR SENHA) -->
+    <div id="login-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900 px-4">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl border border-slate-100 max-w-md w-full text-center">
+            <!-- Logo Alta com Slogan na Tela de Login -->
+            <img src="Captura_de_tela_2023-06-19_151634-removebg-preview.png" alt="Alta Genetics" class="h-20 mx-auto mb-6 object-contain">
+            
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Acesso Restrito</h2>
+            <p class="text-sm text-slate-500 mb-6">Insira a senha do programa Concept Plus Leite para acessar os tutoriais e scripts.</p>
+            
+            <div class="space-y-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="password-input" onkeydown="handleKeyPress(event)" placeholder="Digite a senha..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all">
+                </div>
+                
+                <!-- Mensagem de erro oculta -->
+                <p id="error-message" class="text-xs text-red-600 font-semibold hidden flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Senha incorreta. Tente novamente!
+                </p>
+
+                <button onclick="checkPassword()" class="w-full py-3 bg-blue-900 hover:bg-blue-800 text-white font-bold rounded-xl shadow-md transition-all">
+                    Entrar no Portal <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO DO PORTAL (INICIALMENTE OCULTO) -->
+    <div id="main-content" class="hidden flex-grow flex flex-col">
+        
+        <!-- Header / Navbar Co-branded -->
+        <header class="bg-white border-b border-slate-200 shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <!-- Logo Concept Plus -->
+                    <img src="Slogan_Azul.png" alt="Concept Plus Logo" class="h-12 object-contain">
+                    <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+                    <!-- Logo Alta Plain -->
+                    <img src="slogan.png" alt="Alta Genetics Logo" class="h-8 object-contain">
+                </div>
+                <div class="flex items-center gap-2 text-xs bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-emerald-800 font-medium">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Versão Oficial do Script: 8.0
+                </div>
+            </div>
+        </header>
+
+        <!-- Banner Principal (Hero) -->
+        <section class="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-12 px-4 shadow-inner">
+            <div class="container mx-auto max-w-4xl text-center">
+                <h2 class="text-3xl md:text-4xl font-extrabold mb-4">Central de Extração Ideagri</h2>
+                <p class="text-blue-100 text-base md:text-lg max-w-2xl mx-auto">
+                    Siga as instruções abaixo para extrair corretamente os dados de reprodução e taxa de prenhez necessários para o programa 2026.
+                </p>
+            </div>
+        </section>
+
+        <!-- Navegação por Abas -->
+        <div class="sticky top-0 bg-white border-b border-slate-200 shadow-sm z-50">
+            <div class="container mx-auto max-w-5xl px-4">
+                <div class="flex overflow-x-auto gap-2 md:gap-6 py-3 no-scrollbar">
+                    <button onclick="switchTab('sql-tab')" id="btn-sql-tab" class="tab-btn px-4 py-2 font-semibold text-sm rounded-lg flex items-center gap-2 whitespace-nowrap transition-all bg-blue-900 text-white">
+                        <i class="fa-solid fa-code"></i> 1. Script SQL Unificado
+                    </button>
+                    <button onclick="switchTab('individual-tab')" id="btn-individual-tab" class="tab-btn px-4 py-2 font-semibold text-sm rounded-lg flex items-center gap-2 whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-file-invoice"></i> 2. Uma Fazenda (Individual)
+                    </button>
+                    <button onclick="switchTab('lote-tab')" id="btn-lote-tab" class="tab-btn px-4 py-2 font-semibold text-sm rounded-lg flex items-center gap-2 whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-cubes"></i> 3. Múltiplas Fazendas (Lote)
+                    </button>
+                    <button onclick="switchTab('envio-tab')" id="btn-envio-tab" class="tab-btn px-4 py-2 font-semibold text-sm rounded-lg flex items-center gap-2 whitespace-nowrap transition-all text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-paper-plane"></i> 4. Checklist & Envio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <main class="container mx-auto max-w-5xl px-4 py-8 flex-grow">
+
+            <!-- ABA 1: SCRIPT SQL UNIFICADO -->
+            <section id="sql-tab" class="tab-content block">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-950 flex items-center gap-2">
+                                <span class="p-1.5 bg-blue-100 text-blue-700 rounded"><i class="fa-solid fa-database"></i></span>
+                                Consulta SQL de Extração (Versão 8.0)
+                            </h3>
+                            <p class="text-sm text-slate-500 mt-1">Este script extrai os dados reprodutivos de 01/01/2025 a 30/06/2026. Não modifique as datas.</p>
+                        </div>
+                        <button onclick="copySQL()" id="btn-copy" class="w-full md:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-copy"></i> Copiar Código SQL
+                        </button>
+                    </div>
+
+                    <div class="relative bg-slate-900 rounded-lg overflow-hidden border border-slate-800">
+                        <div class="absolute right-3 top-3 text-xs text-slate-500 font-mono select-none">SQL - FIREBIRD (IDEAGRI)</div>
+                        <pre class="p-4 overflow-x-auto max-h-[480px] text-xs font-mono text-emerald-400/90 leading-relaxed"><code id="sql-code">-- ========================================================
+-- CONSULTA SQL: EXTRAÇÃO DE DADOS REPRODUTIVOS E PRODUTIVOS
+-- VERSÃO: 8.0 | PROGRAMA CONCEPT PLUS LEITE 2026
+-- COMPATIBILIDADE: BANCO DE DADOS IDEAGRI (FIREBIRD)
+-- OBJETIVO: Extração de dados reprodutivos para Concept Plus
+-- ========================================================
+
+SELECT  
+  MUN.UF AS "ESTADO"
+  , MUN.MUNICIPIO AS "MUNICÍPIO"
+  , FAZ.NOME AS "FAZENDA"
+  , AN.NUMERO AS "NÚMERO DA MATRIZ"
+  , AN.DTNASCIMENTO AS "DATA DE NASCIMENTO"
+  , AN.DTENTFAZENDA AS "DATA DE ENTRADA NA FAZENDA"
+  , AN.DTAPTIDAO AS "DATA DE APTIDÃO"
+  , (SELECT GRAUSANGUE  
+     FROM SP_CALCULAGRAUSANGUE(TENT.CDANIMAL)) AS "RAÇA DA MATRIZ"
+  , AN.DTBAIXA AS "DATA DE BAIXA"
+  , TB.DESCRICAO AS "TIPO DE BAIXA"
+  , MB.DESCRICAO AS "MOTIVO DE BAIXA" 
+  , PESDES.GPD AS "GANHO DE PESO NASCIMENTO A DESMAMA"
+  , PROP.NOME AS "PROPRIETÁRIO"
+  , PAI.IDSEMEN AS "IDSEMEN PAI"
+  , COALESCE(PAI.NOME, PAI.NUMERO) AS "NÚMERO PAI"
+  , AVOMATERNO.IDSEMEN AS "IDSEMEN AVÓ MATERNO"
+  , COALESCE(AVOMATERNO.NOME, AVOMATERNO.NUMERO) AS "NÚMERO AVÓ MATERNO"
+  , ULTPAR.DATA AS "DATA DO ÚLTIMO PARTO"
+  ,  TP.DESCRICAO AS "TIPO DE PARTO"
+  , ((SELECT COUNT(*) 
+      FROM REPRODUCAO 
+      WHERE CDTIPOREPRODUCAO = 7 
+        AND CDANIMAL = AN.CDANIMAL 
+        AND DATA <= ULTPAR.DATA) + COALESCE(AN.NUMPARTOENTRADA,0)) AS "ORDEM DE PARTO"
+  , ULTPAR.RETENCAOPLACENTA AS "RETENÇÃO DE PLACENTA"
+  , (CASE 
+     WHEN ULTPAR.NUMCRIA > 1 THEN 'SIM'
+     WHEN ULTPAR.NUMCRIA = 1 THEN 'NÃO'
+     ELSE NULL END) AS "GEMELAR ÚLTIMO PARTO"
+  , COALESCE(CRIA1ULTPAR.SEXO, ULTPAR.SEXOCRIA1, '') AS "SEXO CRIA 1 - ÚLTIMO PARTO"
+  , COALESCE(CRIA2ULTPAR.SEXO, ULTPAR.SEXOCRIA2, '') AS "SEXO CRIA 2 - ÚLTIMO PARTO" 
+  , PE.PESO AS "PESO AO PARTO"
+  , ECCSEC.VALOR AS "ECC NA SECAGEM"
+  , ECCULTPAR.VALOR AS "ECC ÚLTIMO PARTO"
+  , TENT.DATA AS "DATA DO SERVIÇO"
+  , TR.DESCRICAO AS "TIPO DO SERVIÇO" 
+  , PES.NOME AS "INSEMINADOR"
+  , (CASE TENT.CONDICAOIA
+     WHEN 'N' THEN 'CIO NATURAL'
+     WHEN 'P' THEN 'PROSTAGLANDINA' 
+     WHEN 'I' THEN 'PROTOCOLO IATF' 
+     ELSE NULL END) AS "CONDIÇÃO DE IA"
+  , PIATF.DESCRICAO AS "PROTOCOLO"  
+  , (CASE WHEN TENT.CDTIPOREPRODUCAO IN (1,2) THEN COALESCE(COALESCE(REP.NOME, REP.NUMERO), 'N. INF')
+     ELSE COALESCE(REPTE.NOME, REPTE.NUMERO) END) AS "REPRODUTOR"
+  , (CASE WHEN TENT.CDTIPOREPRODUCAO IN (1,2) THEN REP.IDSEMEN
+    ELSE REPTE.IDSEMEN END) AS "IDSEMEN REPRODUTOR"   
+  , (CASE 
+     WHEN TENT.CDTIPOREPRODUCAO = 1 THEN (CASE REP.CDTIPOSEMEN 
+                                                                                    WHEN 1 THEN 'C' 
+                                                                                WHEN 2 THEN 'S' 
+                                                                                  WHEN 3 THEN 'S' 
+                                                                                  ELSE NULL END)
+     WHEN TENT.CDTIPOREPRODUCAO = 3 THEN (CASE REPTE.CDTIPOSEMEN 
+                                                                                  WHEN 1 THEN 'C' 
+                                                                              WHEN 2 THEN 'S' 
+                                                                              WHEN 3 THEN 'S' 
+                                                                              ELSE NULL END)                                                                                     
+     ELSE NULL END) AS "TIPO DE SÊMEN"   
+  , (CASE 
+     WHEN TENT.CDTIPOREPRODUCAO IN (1,2) AND TENT.CDREPRODUTOR IS NOT NULL THEN (SELECT GRAUSANGUE FROM SP_CALCULAGRAUSANGUE(REP.CDANIMAL))
+     WHEN TENT.CDTIPOREPRODUCAO = 2 AND TENT.CDREPRODUTOR IS NULL THEN (SELECT DESCRICAO FROM RACA WHERE CDRACA = TENT.CDRACA)
+     ELSE (SELECT GRAUSANGUE FROM SP_CALCULAGRAUSANGUE(REPTE.CDANIMAL)) END) AS "RAÇA DO REPRODUTOR"
+  , (SELECT COUNT(*) 
+     FROM REPRODUCAO RE 
+     WHERE RE.CDANIMAL = AN.CDANIMAL 
+       AND RE.CDTIPOREPRODUCAO IN (1,2,3) 
+       AND RE.DATA <= TENT.DATA 
+       AND RE.DATA > COALESCE(ULTPAR.DATA, '1900-01-01')) AS "ORDEM DE TENTATIVA" 
+  , (CASE WHEN (TENTANT.CDREPRODUCAO IS NOT NULL) THEN (TENT.DATA - TENTANT.DATA) 
+     ELSE NULL END) AS "INTERVALO ENTRE TENTATIVAS"
+  , TENT.TEMPERATURARETAL AS "Tº RETAL IA/IATF"    
+  , SE.NOME AS "SETOR NA TENTATIVA"  
+  , (CASE WHEN PROX.CDTIPOREPRODUCAO = 7 THEN NULL ELSE PROX.DATA END) AS "DATA DO DIAGNOSTICO"
+  , (CASE 
+     WHEN ((PROX.CDTIPOREPRODUCAO IN (1,2,3)) OR (PROX.DIAGNOSTICO = 'N') OR (PROX.CIO IN (1,2))) THEN 'NEGATIVO' 
+     WHEN (PROX.DIAGNOSTICO = 'P') THEN 'POSITIVO' 
+     ELSE 'ABERTO' END) AS "DIAGNÓSTICO"
+  , (CASE WHEN (PROX.DIAGNOSTICO = 'P' AND
+                    ((PROX2.CDTIPOREPRODUCAO IN (1,2,3))
+                        OR (PROX2.DIAGNOSTICO = 'N')
+                        OR (PROX2.CIO IN (1,2))
+                        OR (PROX2.CDTIPOREPRODUCAO = 7 AND PROX2.CDTIPOPARTO = 3)))
+            THEN (PROX2.DATA)
+            ELSE NULL END) AS "DATA DA PERDA DE PRENHEZ"
+  , (CASE WHEN (PROX.DIAGNOSTICO = 'P' AND
+                    ((PROX2.CDTIPOREPRODUCAO IN (1,2,3))
+                        OR (PROX2.DIAGNOSTICO = 'N')
+                        OR (PROX2.CIO IN (1,2))
+                        OR (PROX2.CDTIPOREPRODUCAO = 7 AND PROX2.CDTIPOPARTO = 3)))
+            THEN (CASE 
+                  WHEN (PROX2.CDTIPOREPRODUCAO = 1) THEN 'INSEMINAÇÃO'
+                  WHEN (PROX2.CDTIPOREPRODUCAO = 2) THEN 'COBERTURA'
+                  WHEN (PROX2.CDTIPOREPRODUCAO = 3) THEN 'TRANSFERÊNCIA'
+                  WHEN (PROX2.DIAGNOSTICO = 'N') THEN 'DIAGNÓSTICO'
+                  WHEN (PROX2.CIO IN (1,2)) THEN 'CIO'
+                  WHEN (PROX2.CDTIPOREPRODUCAO = 7 AND PROX2.CDTIPOPARTO = 3) THEN 'ABORTO' ELSE NULL END)
+            ELSE NULL END) AS "TIPO DA PERDA DE PRENHEZ"
+  , ANP.CCS AS "CCS NO PRIMEIRO MÊS PÓS PARTO"
+  , COALESCE((SELECT FIRST 1 RE.CCS 
+              FROM ANALISELEITE RE 
+              WHERE RE.CDANIMAL = TENT.CDANIMAL 
+                AND RE.DTANALISELEITE >= (TENT.DATA - 30) 
+                AND RE.DTANALISELEITE <= TENT.DATA 
+                      ORDER BY RE.DTANALISELEITE DESC), 
+                          (SELECT FIRST 1 RE.CCS
+                           FROM ANALISELEITE RE 
+                           WHERE RE.CDANIMAL = TENT.CDANIMAL 
+                             AND RE.DTANALISELEITE <= (TENT.DATA + 30) 
+                             AND RE.DTANALISELEITE >= TENT.DATA 
+                           ORDER BY RE.DTANALISELEITE ASC)) AS "CCS"
+  , (CASE 
+     WHEN LACANT.CDLACTACAO IS NULL THEN NULL
+     WHEN LACANT.DTFIM IS NOT NULL THEN (SELECT PRODUCAOTOTAL FROM SP_CALCULAPRODUCAOTOTAL(LACANT.CDLACTACAO, LACANT.DTFIM)) 
+     WHEN LACANT.DTFIM IS NULL THEN (SELECT PRODUCAO305 FROM SP_PRODUCAO305(LACANT.CDLACTACAO)) 
+     ELSE NULL END) AS "PRODUÇÃO LACTAÇÃO ANTERIOR"                                                    
+  , (CASE 
+     WHEN (LACANT.CDLACTACAO IS NOT NULL AND LACANT.DTFIM IS NOT NULL) THEN (LACANT.DTFIM - LACANT.DTINICIO) 
+     WHEN (LACANT.CDLACTACAO IS NOT NULL AND LACANT.DTFIM IS NULL) THEN (CURRENT_DATE - LACANT.DTINICIO) 
+     ELSE NULL END) AS "DURAÇÃO DA LACTAÇÃO ANTERIOR (DIAS)"
+  , (CASE WHEN (LACANT.CDLACTACAO IS NOT NULL) THEN (LAC.DTINICIO - LACANT.DTFIM)
+     ELSE NULL END) AS "PERIODO SECO ANTERIOR (DIAS)"
+  , (CASE 
+     WHEN LAC.CDLACTACAO IS NULL THEN NULL
+     WHEN LAC.DTFIM IS NOT NULL THEN (SELECT PRODUCAOTOTAL FROM SP_CALCULAPRODUCAOTOTAL(LAC.CDLACTACAO, LAC.DTFIM)) 
+     WHEN LAC.DTFIM IS NULL THEN (SELECT PRODUCAO305 FROM SP_PRODUCAO305(LAC.CDLACTACAO)) 
+     ELSE NULL END) AS "PRODUÇÃO DE LEITE"  
+  , (CASE 
+     WHEN ((EXISTS (SELECT * 
+                    FROM MAMITE RE 
+                    WHERE RE.CDANIMAL = TENT.CDANIMAL 
+                      AND RE.DATA >= (TENT.DATA - 30) 
+                      AND RE.DATA <= (TENT.DATA + 30)
+                      AND ((RE.AD IN (0,1,2)) OR (RE.AE IN (0,1,2)) OR (RE.PD IN (0,1,2)) OR (RE.PE IN (0,1,2))))) 
+                      OR (EXISTS (SELECT * 
+                                  FROM DOENCAANIMAL RE 
+                                  WHERE RE.CDANIMAL = TENT.CDANIMAL 
+                                    AND RE.DTINICIO > ULTPAR.DATA 
+                                    AND RE.DTINICIO <= TENT.DATA))) THEN '1' 
+     ELSE '0' END) AS "DOENÇA NA LACTAÇÃO"                             
+   , (SELECT FIRST 1 RE.VALOR 
+      FROM MEDIDA RE 
+      WHERE RE.CDANIMAL = TENT.CDANIMAL 
+        AND RE.CDTIPOMEDIDA = 2 
+        AND RE.DTMEDIDA >= (TENT.DATA - 30) 
+        AND RE.DTMEDIDA <= (TENT.DATA + 30) 
+      ORDER BY RE.DTMEDIDA DESC) AS "ESCORE"
+  , (CASE WHEN (EXISTS (SELECT * 
+                        FROM REPRODUCAO RE 
+                        WHERE RE.CDANIMAL = TENT.CDANIMAL 
+                        AND ((RE.CDRESULTADOEXAMEOE IN (SELECT CDRESULTADOEXAMEGINECOLOGICO 
+                                                        FROM RESULTADOEXAMEGINECOLOGICO 
+                                                        WHERE UPPER(NOMERESUMIDO) LIKE '%CL%'))
+                        OR (RE.CDRESULTADOEXAMEOD IN (SELECT CDRESULTADOEXAMEGINECOLOGICO 
+                                                      FROM RESULTADOEXAMEGINECOLOGICO 
+                                                      WHERE UPPER(NOMERESUMIDO) LIKE '%CL%'))) 
+                        AND RE.DATA >= (TENT.DATA - 17) 
+                        AND RE.DATA <= TENT.DATA)) THEN '1' 
+          ELSE '0' END) AS "CL INÍCIO PROTOCOLO"
+  , (SELECT VALOR FROM CONFIGURACAO CONF WHERE UPPER(CONF.NOME) LIKE '%PERIODOREPRODUCAOPOSPARTO%') AS "PEV"
+  , PP.DATA AS PARTO_REAL
+  , (SELECT DESCRICAO FROM TIPOPARTO WHERE CDTIPOPARTO = PP.CDTIPOPARTO) AS TIPO_PARTO_REAL
+  , COALESCE(CRIA1PARREAL.SEXO, PP.SEXOCRIA1, '') AS "SEXO CRIA 1 - ÚLTIMO PARTO REAL"
+  , COALESCE(CRIA2PARREAL.SEXO, PP.SEXOCRIA2, '') AS "SEXO CRIA 2 - ÚLTIMO PARTO REAL"
+  , PRILAC.DTINICIO AS "DATA DE INÍCIO DA PRIMEIRA LACTAÇÃO"
+  , PRILAC.DTFIM AS "DATA DE TÉRMINO DA PRIMEIRA LACTAÇÃO"
+  , (CASE 
+     WHEN PRILAC.CDLACTACAO IS NULL THEN NULL
+     WHEN (PRILAC.DTFIM IS NOT NULL) AND ((PRILAC.DTFIM - PRILAC.DTINICIO) <= 305) THEN (SELECT PRODUCAOTOTAL FROM SP_CALCULAPRODUCAOTOTAL(PRILAC.CDLACTACAO, PRILAC.DTFIM))
+	 ELSE (SELECT PRODUCAO305 FROM SP_PRODUCAO305(PRILAC.CDLACTACAO)) END) AS "PRODUÇÃO TOTAL NA PRIMEIRA LACTAÇÃO"
+FROM FAZENDA FAZ
+LEFT JOIN ANIMAL AN ON 1 = 1 
+JOIN REPRODUCAO TENT ON TENT.CDANIMAL = AN.CDANIMAL
+LEFT JOIN PROTOCOLOIATF PIATF ON PIATF.CDPROTOCOLOIATF = TENT.CDPROTOCOLOIATF
+LEFT JOIN REPRODUCAO PROX ON PROX.CDREPRODUCAO = (SELECT FIRST 1 RE.CDREPRODUCAO 
+                                                  FROM REPRODUCAO RE 
+                                                  WHERE RE.CDANIMAL = AN.CDANIMAL AND RE.DATA > TENT.DATA 
+                                                    AND ((RE.CDTIPOREPRODUCAO IN (1,2,3,7)) OR (RE.DIAGNOSTICO IS NOT NULL) OR (RE.CIO IN (1,2)))
+                                                  ORDER BY RE.DATA ASC)
+LEFT JOIN REPRODUCAO PROX2 ON PROX2.CDREPRODUCAO = (SELECT FIRST 1 RE.CDREPRODUCAO
+                                                    FROM REPRODUCAO RE
+                                                    WHERE RE.CDANIMAL = PROX.CDANIMAL AND RE.DATA > PROX.DATA
+                                                    AND ((RE.CDTIPOREPRODUCAO IN (1,2,3,7)) OR (RE.DIAGNOSTICO IS NOT NULL) OR (RE.CIO IN (1,2)))
+                                                    AND ((RE.DIAGNOSTICO IS NULL) OR (RE.DIAGNOSTICO = 'N'))
+                                                    ORDER BY RE.DATA ASC)
+LEFT JOIN SETOR SE ON SE.CDSETOR = (SELECT SETOR FROM SP_SETORANIMAL(AN.CDANIMAL, TENT.DATA))
+LEFT JOIN ANIMAL EMB ON EMB.CDANIMAL = TENT.CDEMBRIAO
+LEFT JOIN ANIMAL DOA ON DOA.CDANIMAL = EMB.CDMAE 
+LEFT JOIN REPRODUCAO ULTPAR ON ULTPAR.CDREPRODUCAO = (SELECT FIRST 1 RE.CDREPRODUCAO 
+                                                      FROM REPRODUCAO RE 
+                                                      WHERE RE.CDANIMAL = TENT.CDANIMAL 
+                                                        AND RE.CDTIPOREPRODUCAO = 7 
+                                                        AND RE.DATA < TENT.DATA
+                                                      ORDER BY RE.DATA DESC) 
+LEFT JOIN REPRODUCAO TENTANT ON TENTANT.CDREPRODUCAO = (SELECT FIRST 1 RE.CDREPRODUCAO 
+                                                        FROM REPRODUCAO RE 
+                                                        WHERE RE.CDANIMAL = TENT.CDANIMAL 
+                                                          AND RE.CDTIPOREPRODUCAO = ANY (SELECT CDTIPOREPRODUCAO FROM TIPOREPRODUCAO WHERE CDTIPOREPRODUCAO < 4)
+                                                          AND RE.DATA > COALESCE(ULTPAR.DATA, '1900-01-01') 
+                                                          AND RE.DATA < TENT.DATA 
+                                                                                                                ORDER BY RE.DATA DESC)
+LEFT JOIN LACTACAO LAC ON LAC.CDLACTACAO = (SELECT FIRST 1 CDLACTACAO FROM LACTACAO WHERE DTINICIO = ULTPAR.DATA AND CDANIMAL = ULTPAR.CDANIMAL)
+LEFT JOIN LACTACAO LACANT ON LACANT.CDLACTACAO = (SELECT FIRST 1 L.CDLACTACAO
+                                                  FROM LACTACAO L 
+                                                  WHERE L.CDANIMAL = LAC.CDANIMAL
+                                                    AND L.DTINICIO < LAC.DTINICIO 
+                                                  ORDER BY L.DTINICIO DESC)
+LEFT JOIN ANIMAL REP ON REP.CDANIMAL = TENT.CDREPRODUTOR
+LEFT JOIN ANIMAL REPTE ON REPTE.CDANIMAL = EMB.CDPAI 
+LEFT JOIN PESSOA PES ON PES.CDPESSOA = TENT.CDPESSOA
+LEFT JOIN PESSOA PROP ON PROP.CDPESSOA = AN.CDPROPRIETARIO
+LEFT JOIN TIPOREPRODUCAO TR ON TR.CDTIPOREPRODUCAO = TENT.CDTIPOREPRODUCAO
+LEFT JOIN TIPOPARTO TP ON TP.CDTIPOPARTO = ULTPAR.CDTIPOPARTO
+LEFT JOIN MUNICIPIO MUN ON FAZ.CDMUNICIPIO = MUN.CDMUNICIPIO
+LEFT JOIN ANALISELEITE ANP ON ANP.CDANALISELEITE = (SELECT FIRST 1 RE.CDANALISELEITE 
+                                                    FROM ANALISELEITE RE 
+                                                    WHERE RE.CDANIMAL = AN.CDANIMAL 
+                                                      AND RE.CCS IS NOT NULL 
+                                                      AND RE.DTANALISELEITE > ULTPAR.DATA
+                                                      AND RE.DTANALISELEITE < (ULTPAR.DATA + 30) 
+                                                    ORDER BY RE.DTANALISELEITE ASC)
+LEFT JOIN PESO PE ON PE.CDPESO = (SELECT FIRST 1 P.CDPESO
+                                  FROM PESO P 
+                                  WHERE P.CDANIMAL = ULTPAR.CDANIMAL
+                                    AND P.DTPESO >= ULTPAR.DATA 
+                                    AND P.DTPESO < (ULTPAR.DATA + 7)
+                                  ORDER BY P.DTPESO ASC)
+LEFT JOIN PESO PESDES ON PESDES.CDANIMAL = AN.CDANIMAL 
+  AND PESDES.DTPESO = AN.DTDESMAMA                               
+LEFT JOIN ANIMAL PAI ON PAI.CDANIMAL = AN.CDPAI 
+LEFT JOIN ANIMAL MAE ON MAE.CDANIMAL = AN.CDMAE 
+LEFT JOIN ANIMAL AVOMATERNO ON AVOMATERNO.CDANIMAL = MAE.CDPAI
+LEFT JOIN MOTIVOBAIXA MB ON MB.CDMOTIVOBAIXA = AN.CDMOTIVOBAIXA
+LEFT JOIN TIPOBAIXA TB ON TB.CDTIPOBAIXA = AN.CDTIPOBAIXA
+LEFT JOIN REPRODUCAO PP ON PP.CDREPRODUCAO=
+    (SELECT FIRST 1 RE.CDREPRODUCAO FROM REPRODUCAO RE
+        WHERE RE.CDANIMAL = TENT.CDANIMAL AND RE.DATA > TENT.DATA AND RE.CDTIPOREPRODUCAO = 7
+        AND NOT EXISTS (SELECT * FROM REPRODUCAO REE WHERE REE.CDANIMAL = RE.CDANIMAL AND REE.DATA > TENT.DATA
+                        AND REE.DATA < RE.DATA AND ((REE.CDTIPOREPRODUCAO IN (1,2,3)
+                        OR (REE.DIAGNOSTICO='N') OR (REE.CIO IN (1,2))))))
+LEFT JOIN ANIMAL CRIA1ULTPAR ON CRIA1ULTPAR.CDANIMAL =
+(SELECT FIRST 1 RE.CDANIMAL FROM ANIMAL RE WHERE RE.CDREPRODUCAO = ULTPAR.CDREPRODUCAO ORDER BY RE.CDANIMAL ASC)
+LEFT JOIN ANIMAL CRIA2ULTPAR ON CRIA2ULTPAR.CDANIMAL =
+(SELECT FIRST 1 RE.CDANIMAL FROM ANIMAL RE WHERE RE.CDREPRODUCAO = ULTPAR.CDREPRODUCAO AND RE.CDANIMAL <> CRIA1ULTPAR.CDANIMAL ORDER BY RE.CDANIMAL ASC)
+LEFT JOIN ANIMAL CRIA1PARREAL ON CRIA1PARREAL.CDANIMAL =
+(SELECT FIRST 1 RE.CDANIMAL FROM ANIMAL RE WHERE RE.CDREPRODUCAO = PP.CDREPRODUCAO ORDER BY RE.CDANIMAL ASC)
+LEFT JOIN ANIMAL CRIA2PARREAL ON CRIA2PARREAL.CDANIMAL =
+(SELECT FIRST 1 RE.CDANIMAL FROM ANIMAL RE WHERE RE.CDREPRODUCAO = PP.CDREPRODUCAO AND RE.CDANIMAL <> CRIA1PARREAL.CDANIMAL ORDER BY RE.CDANIMAL ASC)
+LEFT JOIN MEDIDA ECCSEC ON ECCSEC.CDMEDIDA = (SELECT FIRST 1 CDMEDIDA 
+											  FROM MEDIDA MED
+											  WHERE MED.CDTIPOMEDIDA = 2
+											    AND MED.DTMEDIDA = LAC.DTFIM 
+											    AND MED.CDANIMAL = LAC.CDANIMAL)
+LEFT JOIN MEDIDA ECCULTPAR ON ECCULTPAR.CDMEDIDA = (SELECT FIRST 1 CDMEDIDA 
+												    FROM MEDIDA MED
+												    WHERE MED.CDTIPOMEDIDA = 2
+												    AND MED.DTMEDIDA = ULTPAR.DATA 
+												    AND MED.CDANIMAL = ULTPAR.CDANIMAL)		
+LEFT JOIN LACTACAO PRILAC ON PRILAC.CDLACTACAO = (SELECT FIRST 1 CDLACTACAO
+												  FROM LACTACAO 
+												  WHERE CDANIMAL = AN.CDANIMAL
+												  ORDER BY DTINICIO ASC)
+WHERE TENT.CDTIPOREPRODUCAO = ANY (SELECT CDTIPOREPRODUCAO 
+                                   FROM TIPOREPRODUCAO 
+                                   WHERE CDTIPOREPRODUCAO < 4)
+  AND AN.TIPOANIMAL = 'A' 
+  AND AN.ANIMALREBANHO = 1
+-- ATENÇÃO: NÃO ALTERE ESTE PERÍODO DE TENTATIVAS PARA O PROGRAMA 2026 --  
+  AND TENT.DATA BETWEEN '2025-01-01' AND '2026-06-30'
+ORDER BY AN.NUMERO, TENT.DATA</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA 2: EXTRAÇÃO INDIVIDUAL (1 FAZENDA) -->
+            <section id="individual-tab" class="tab-content hidden">
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-bold text-slate-950 flex items-center gap-2 mb-2">
+                            <span class="p-1.5 bg-blue-100 text-blue-700 rounded"><i class="fa-solid fa-cow"></i></span>
+                            Extração Individual (Uma única Fazenda)
+                        </h3>
+                        <p class="text-sm text-slate-500">Siga as instruções passo a passo para gerar os arquivos corretos dentro do Ideagri.</p>
+                    </div>
+
+                    <!-- Passo a Passo -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Card 1 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-lg shrink-0">1</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 mb-1">Acessar a Consulta SQL</h4>
+                                <p class="text-sm text-slate-600">No painel principal do Ideagri, acesse o menu superior e navegue até:</p>
+                                <p class="text-xs font-semibold text-blue-700 mt-2 bg-blue-50 px-2 py-1 rounded inline-block">DASHBOARD &rarr; UTILITÁRIOS &rarr; CONSULTA SQL</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-lg shrink-0">2</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 mb-1">Rodar e Exportar</h4>
+                                <p class="text-sm text-slate-600">Cole o Script da primeira aba na caixa branca e clique em <strong class="text-blue-700">Executar</strong>. Quando os dados carregarem, clique com o botão direito e exporte como:</p>
+                                <span class="text-xs font-semibold text-emerald-700 mt-2 bg-emerald-50 px-2 py-1 rounded inline-block">Tipo: CSV (*.csv)</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-lg shrink-0">3</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 mb-1">Relatório de Prenhez - Vacas</h4>
+                                <p class="text-sm text-slate-600">Vá em <strong class="text-slate-800">RELATÓRIO &rarr; ANIMAL &rarr; Taxa de prenhez</strong>. Ajuste o período para <span class="underline">01/07/2025 a 30/06/2026</span>. Marque as caixas de animais <em>Padrão, Receptora e Doadora</em>. Filtre a categoria apenas para <strong class="text-blue-700">Vacas</strong> e salve o PDF.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-lg shrink-0">4</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 mb-1">Relatório de Prenhez - Novilhas</h4>
+                                <p class="text-sm text-slate-600">Com os mesmos filtros do passo anterior, altere a categoria apenas para <strong class="text-blue-700">Novilhas</strong>. Execute e exporte em PDF.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA 3: EXTRAÇÃO MULTICENTRO (LOTE) -->
+            <section id="lote-tab" class="tab-content hidden">
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-bold text-slate-950 flex items-center gap-2 mb-2">
+                            <span class="p-1.5 bg-blue-100 text-blue-700 rounded"><i class="fa-solid fa-cubes"></i></span>
+                            Extração Multicentro (Múltiplas Fazendas)
+                        </h3>
+                        <p class="text-sm text-slate-500">Indicado para quem tem acesso às bases de dados de várias propriedades e quer fazer uma varredura sequencial automática.</p>
+                    </div>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                        <div class="flex gap-3">
+                            <div class="text-amber-700 text-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div>
+                                <h4 class="font-bold text-amber-900 text-sm">Nota sobre Relatórios de Prenhez</h4>
+                                <p class="text-xs text-amber-800 mt-1 font-medium">O exportador sequencial gera o arquivo consolidador de dados (CSV), mas os PDFs de Taxa de Prenhez (Vacas e Novilhas) devem ser emitidos manualmente para cada uma das fazendas.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Passo 1 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 flex items-center justify-center font-bold shrink-0">1</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Configurar SQL</h4>
+                                <p class="text-sm text-slate-600">Acesse o utilitário SQL e cole o script da primeira aba da mesma forma.</p>
+                            </div>
+                        </div>
+                        <!-- Passo 2 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 flex items-center justify-center font-bold shrink-0">2</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Exportar Múltiplas Fazendas</h4>
+                                <p class="text-sm text-slate-600">Ao invés de clicar em Executar, clique na <strong>setinha apontando para baixo</strong> ao lado do botão de Executar e escolha a opção <strong class="text-blue-700">"Exportar múltiplas fazendas..."</strong>.</p>
+                            </div>
+                        </div>
+                        <!-- Passo 3 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 flex items-center justify-center font-bold shrink-0">3</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Marcar as Fazendas e Destino</h4>
+                                <p class="text-sm text-slate-600">Na lista, marque todas as fazendas desejadas. Selecione a pasta de destino e salve o arquivo final de saída como <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">ConsultaIdeagri_Consolidado_2026.csv</code>.</p>
+                            </div>
+                        </div>
+                        <!-- Passo 4 -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-800 flex items-center justify-center font-bold shrink-0">4</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Processamento Sequencial</h4>
+                                <p class="text-sm text-slate-600">Clique em <strong>Processar</strong> e aguarde o sistema concluir a geração do consolidado.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA 4: CHECKLIST & ENVIO -->
+            <section id="envio-tab" class="tab-content hidden">
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-bold text-slate-950 flex items-center gap-2 mb-2">
+                            <span class="p-1.5 bg-emerald-100 text-emerald-700 rounded"><i class="fa-solid fa-paper-plane"></i></span>
+                            Instruções de Envio dos Dados
+                        </h3>
+                        <p class="text-sm text-slate-500">Revise os arquivos antes do envio oficial para evitar recusas ou erros de formatação.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Card Checklist -->
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                            <h4 class="font-bold text-slate-950 mb-4 pb-2 border-b border-slate-100">📋 Arquivos Necessários</h4>
+                            <ul class="space-y-3 text-sm text-slate-600">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-emerald-500 mt-0.5"><i class="fa-solid fa-circle-check"></i></span>
+                                    <div>
+                                        <strong>Arquivo de Dados Brutos (CSV)</strong>
+                                        <p class="text-xs text-slate-400">Dados extraídos via SQL (período de tentativas de 01/01/2025 a 30/06/2026).</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-emerald-500 mt-0.5"><i class="fa-solid fa-circle-check"></i></span>
+                                    <div>
+                                        <strong>PDF de Taxa de Prenhez - Vacas</strong>
+                                        <p class="text-xs text-slate-400">De cada fazenda participante (período de 01/07/2025 a 30/06/2026).</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-emerald-500 mt-0.5"><i class="fa-solid fa-circle-check"></i></span>
+                                    <div>
+                                        <strong>PDF de Taxa de Prenhez - Novilhas</strong>
+                                        <p class="text-xs text-slate-400">De cada fazenda participante (período de 01/07/2025 a 30/06/2026).</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Card Destinatário -->
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-slate-950 mb-3">✉️ Dados de Envio</h4>
+                                <p class="text-sm text-slate-600 mb-2">Envie os arquivos anexados diretamente para a equipe técnica:</p>
+                                <a href="mailto:conceptplusleite@altagenetics.com.br" class="inline-block text-base font-bold text-blue-600 hover:underline mb-4">conceptplusleite@altagenetics.com.br</a>
+                                
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                    <p class="text-xs font-semibold text-slate-500 mb-1">Informar obrigatoriamente no e-mail:</p>
+                                    <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                                        <li>Nome da(s) Fazenda(s)</li>
+                                        <li>Nome do(s) Proprietário(s)</li>
+                                        <li>Telefone de contato com DDD</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Rodapé com Logo Alta Slogan -->
+        <footer class="bg-white text-slate-500 py-8 border-t border-slate-200 text-center text-xs mt-12">
+            <div class="container mx-auto px-4 flex flex-col items-center gap-4">
+                <img src="Captura_de_tela_2023-06-19_151634-removebg-preview.png" alt="Alta Genetics" class="h-14 object-contain">
+                <div>
+                    <p>&copy; 2026 Alta Genetics - Todos os direitos reservados.</p>
+                    <p class="mt-1 text-slate-400">Desenvolvido em apoio ao Programa de Melhoramento Genético Concept Plus Leite.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts de Interatividade e Segurança -->
+    <script>
+        // Função para gerar o hash SHA-256 de uma string (Impede leitura humana direta do código)
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);                    
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Função que roda ao carregar a página para verificar se já fez login
+        document.addEventListener("DOMContentLoaded", function() {
+            if (sessionStorage.getItem("concept_authenticated") === "true") {
+                document.getElementById("login-screen").classList.add("hidden");
+                document.getElementById("main-content").classList.remove("hidden");
+            }
+        });
+
+        // Evento para habilitar o "Enter" no teclado para submeter a senha
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                checkPassword();
+            }
+        }
+
+        // Validação da Senha de forma Segura
+        async function checkPassword() {
+            const passwordInput = document.getElementById("password-input");
+            const errorElement = document.getElementById("error-message");
+            
+            // Gera o hash da senha digitada pelo usuário
+            const inputHash = await sha256(passwordInput.value);
+            
+            // Hash SHA-256 da senha "Alt5123#4" (Criptografada e ininteligível no código-fonte)
+            const correctHash = "c38b9bb4003f41fbefd23573dcffc3c5cc23d80e3d362375a5731577bde13843";
+            
+            if (inputHash === correctHash) {
+                // Guarda a autenticação na aba ativa
+                sessionStorage.setItem("concept_authenticated", "true");
+                
+                // Transição suave
+                document.getElementById("login-screen").classList.add("hidden");
+                document.getElementById("main-content").classList.remove("hidden");
+            } else {
+                errorElement.classList.remove("hidden");
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
+        }
+
+        // Alternar as abas do portal
+        function switchTab(tabId) {
+            // Esconde todas as abas
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+            });
+
+            // Mostra a aba ativa
+            const targetTab = document.getElementById(tabId);
+            targetTab.classList.remove('hidden');
+            targetTab.classList.add('block');
+
+            // Limpa estilos ativos dos botões
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-900', 'text-white');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+
+            // Aplica estilo ativo ao botão clicado
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            activeBtn.classList.add('bg-blue-900', 'text-white');
+        }
+
+        // Copiar o script SQL com feedback visual
+        function copySQL() {
+            const sqlText = document.getElementById('sql-code').innerText;
+            navigator.clipboard.writeText(sqlText).then(() => {
+                const btn = document.getElementById('btn-copy');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiado com sucesso!';
+                btn.classList.remove('bg-emerald-600');
+                btn.classList.add('bg-emerald-750');
+                
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Código SQL';
+                    btn.classList.remove('bg-emerald-750');
+                    btn.classList.add('bg-emerald-600');
+                }, 2500);
+            }).catch(err => {
+                alert('Erro ao copiar automaticamente. Por favor, selecione todo o código e copie com Ctrl+C.');
+            });
+        }
+    </script>
+</body>
+</html>
